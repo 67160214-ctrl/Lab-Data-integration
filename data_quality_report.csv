@@ -1,0 +1,64 @@
+﻿source,stage,metric,column,count,total_rows,percentage,details
+orders_2026_01.csv,raw,column_profile,order_id,361,361,100.0,dtype=object; missing=0; unique=360
+orders_2026_01.csv,raw,column_profile,order_date,361,361,100.0,dtype=object; missing=0; unique=360
+orders_2026_01.csv,raw,column_profile,customer_id,361,361,100.0,dtype=object; missing=0; unique=147
+orders_2026_01.csv,raw,column_profile,product_id,361,361,100.0,dtype=object; missing=0; unique=41
+orders_2026_01.csv,raw,column_profile,quantity,361,361,100.0,dtype=int64; missing=0; unique=5
+orders_2026_01.csv,raw,column_profile,unit_price,360,361,99.72,dtype=float64; missing=1; unique=28
+orders_2026_01.csv,raw,column_profile,discount,361,361,100.0,dtype=float64; missing=0; unique=3
+orders_2026_01.csv,raw,column_profile,channel,361,361,100.0,dtype=object; missing=0; unique=3
+orders_2026_01.csv,raw,duplicate_rows,,1,361,0.28,duplicate full rows
+orders_2026_02.csv,raw,column_profile,order_id,391,391,100.0,dtype=object; missing=0; unique=390
+orders_2026_02.csv,raw,column_profile,ordered_at,391,391,100.0,dtype=object; missing=0; unique=385
+orders_2026_02.csv,raw,column_profile,customer_id,391,391,100.0,dtype=object; missing=0; unique=152
+orders_2026_02.csv,raw,column_profile,product_id,391,391,100.0,dtype=object; missing=0; unique=41
+orders_2026_02.csv,raw,column_profile,qty,391,391,100.0,dtype=int64; missing=0; unique=5
+orders_2026_02.csv,raw,column_profile,unit_price,390,391,99.74,dtype=float64; missing=1; unique=28
+orders_2026_02.csv,raw,column_profile,discount_pct,391,391,100.0,dtype=object; missing=0; unique=3
+orders_2026_02.csv,raw,column_profile,channel,391,391,100.0,dtype=object; missing=0; unique=3
+orders_2026_02.csv,raw,duplicate_rows,,1,391,0.26,duplicate full rows
+customers_crm.csv,raw,column_profile,customer_id,163,163,100.0,dtype=object; missing=0; unique=160
+customers_crm.csv,raw,column_profile,full_name,163,163,100.0,dtype=object; missing=0; unique=163
+customers_crm.csv,raw,column_profile,email,158,163,96.93,dtype=object; missing=5; unique=155
+customers_crm.csv,raw,column_profile,province,163,163,100.0,dtype=object; missing=0; unique=14
+customers_crm.csv,raw,column_profile,signup_date,163,163,100.0,dtype=object; missing=0; unique=149
+customers_crm.csv,raw,duplicate_rows,,0,163,0.0,duplicate full rows
+product_master.xlsx,raw,column_profile,product_id,40,40,100.0,dtype=object; missing=0; unique=40
+product_master.xlsx,raw,column_profile,product_name,40,40,100.0,dtype=object; missing=0; unique=40
+product_master.xlsx,raw,column_profile,category,40,40,100.0,dtype=object; missing=0; unique=4
+product_master.xlsx,raw,column_profile,standard_price,40,40,100.0,dtype=int64; missing=0; unique=7
+product_master.xlsx,raw,column_profile,active_flag,40,40,100.0,dtype=object; missing=0; unique=2
+product_master.xlsx,raw,duplicate_rows,,0,40,0.0,duplicate full rows
+payments.json,raw,column_profile,payment_id,752,752,100.0,dtype=object; missing=0; unique=751
+payments.json,raw,column_profile,order_id,752,752,100.0,dtype=object; missing=0; unique=751
+payments.json,raw,column_profile,paid_at,752,752,100.0,dtype=object; missing=0; unique=748
+payments.json,raw,column_profile,payment_method,752,752,100.0,dtype=object; missing=0; unique=3
+payments.json,raw,column_profile,payment_status,752,752,100.0,dtype=object; missing=0; unique=3
+payments.json,raw,duplicate_rows,,1,752,0.13,duplicate full rows
+orders,raw,rows_before_concat,,752,752,100.0,361 Jan + 391 Feb
+orders,raw,duplicate_order_id,,2,752,0.27,duplicate order IDs across monthly files
+orders_2026_01.csv,raw,missing_unit_price,,1,361,0.28,unit price missing
+orders_2026_02.csv,raw,missing_unit_price,,1,391,0.26,unit price missing
+orders,raw,nonpositive_quantity,,2,752,0.27,quantity <= 0
+customers_crm.csv,raw,duplicate_customer_id,,3,163,1.84,duplicate IDs
+customers_crm.csv,raw,missing_email,,5,163,3.07,missing email
+payments.json,raw,duplicate_payment_id,,1,752,0.13,duplicate payment ID
+payments.json,raw,orphan_order_id,,1,752,0.13,payment order_id not present in raw orders
+payments.json,raw,non_paid_events,,65,752,8.64,FAILED or REFUNDED are excluded from sales
+orders,after_concat,rows_after_concat,,752,752,100.0,pd.concat(ignore_index=True)
+orders,cleaned,duplicate_orders_removed,,2,752,0.27,keep latest row by order appearance
+customers_crm.csv,cleaned,duplicate_customer_rows_removed,,3,163,1.84,deduplicate by customer_id
+customers_crm.csv,cleaned,missing_email_after_cleaning,,5,160,3.12,retained as missing; email is not required as sales join key
+orders,cleaned,invalid_quantity_rows,,2,750,0.27,quantity must be > 0
+orders,cleaned,invalid_unit_price_rows,,2,750,0.27,unit_price must be > 0
+orders,cleaned,invalid_discount_rows,,0,750,0.0,discount must be between 0 and 1
+orders,validation,unmatched_customer_id,,22,750,2.93,customer_id not found in customer master
+orders,validation,unmatched_product_id,,2,750,0.27,product_id not found in product master
+integration,matched,customer_matched_rows,,728,750,97.07,merge indicator == both
+integration,matched,product_matched_rows,,748,750,99.73,merge indicator == both
+integration,matched,payment_matched_rows,,750,750,100.0,merge indicator == both
+fact_sales,final,valid_paid_sales_rows,,660,750,88.0,valid order + PAID
+fact_sales,final,rows_excluded_before_load,,90,750,12.0,"invalid order, unmatched master, or non-PAID"
+fact_sales,final,total_net_sales,,10224044,1,1022404409.0,sum(net_sales)
+fact_sales,final,unique_customers_in_sales,,158,660,23.94,distinct customer_id
+fact_sales,final,unique_products_in_sales,,40,660,6.06,distinct product_id
