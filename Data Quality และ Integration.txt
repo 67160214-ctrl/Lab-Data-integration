@@ -1,0 +1,35 @@
+## Data Quality Before and After Integration
+
+### Before Integration
+ข้อมูลก่อนทำ Data Integration มีปัญหาหลักดังนี้
+
+- Orders เดือนมกราคมมี 361 แถว และเดือนกุมภาพันธ์มี 391 แถว รวม 752 แถว
+- Orders ของแต่ละเดือนมีชื่อคอลัมน์ไม่เหมือนกัน
+  เช่น January ใช้ `order_date`, `quantity`, `discount`
+  แต่ February ใช้ `ordered_at`, `qty`, `discount_pct`
+- พบ duplicate order_id จำนวน 2 แถวหลังรวมข้อมูล
+- พบ unit_price ว่างใน Orders จำนวน 2 แถว
+  (January 1 แถว และ February 1 แถว)
+- Customer Master มี duplicate customer_id จำนวน 3 แถว
+- Customer มี email ว่างจำนวน 5 แถว
+- Payment มี duplicate payment_id จำนวน 1 แถว
+- Payment มีรายการ FAILED และ REFUNDED
+- มี customer_id และ product_id บางรายการที่ไม่พบใน Master Data
+
+### After Integration
+หลังทำ Data Integration แล้ว ข้อมูลได้รับการทำความสะอาดและตรวจสอบดังนี้
+
+- Schema ของ Orders ทั้ง 2 เดือนถูกปรับให้ตรงกันและรวมด้วย `pd.concat()`
+- ลบ duplicate order_id 2 แถว โดยเก็บข้อมูลล่าสุดตามลำดับที่ปรากฏ
+- ลบ duplicate customer_id 3 แถว
+- ลบ duplicate payment_id 1 แถว
+- แปลงชนิดข้อมูลวันที่ ตัวเลข และ discount ให้เป็นมาตรฐาน
+- ปรับ email เป็นตัวพิมพ์เล็กและตัดช่องว่าง
+- ปรับชื่อจังหวัดให้เป็นมาตรฐาน
+- ตรวจสอบ customer_id และ product_id ด้วย `merge()` และ `indicator=True`
+- ตรวจสอบ cardinality ด้วย `validate=`
+- พบ customer_id ไม่ตรง Master จำนวน 22 แถว
+- พบ product_id ไม่ตรง Master จำนวน 2 แถว
+- ตัดข้อมูลที่ไม่ผ่าน Business Rules และนับเฉพาะ Payment Status = PAID
+- เหลือข้อมูลยอดขายที่ใช้ได้จริง 660 ธุรกรรม
+- Net Sales รวม 10,224,044.09 บาท
